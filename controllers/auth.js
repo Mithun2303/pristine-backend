@@ -6,29 +6,25 @@ const pool = require('../configs/db.config');
 const crypto = require('crypto');
 const { v4 } = require('uuid');
 const dotenv = require('dotenv');
+const { create_token } = require('../utils/jwt');
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
 
 async function register(req, res, next) {
     const { name, email, password, dob, phonenumber } = req.body;
-    if (!password) {
-        res.status(400).json({ message: 'Password is required' })
+    if (!password || !email) {
+        res.status(400).json({ message: 'Bad Request' })
         return;
     }
     try {
-        console.log(email);
-        console.log('Password:', password);
-        //const usercheck = await pool.query('SELECT * FROM users WHERE email == $1',[email]);
         const usercheck = await pool.query("select * from users where email=$1", [email]);
-        // console.log(usercheck);
         if (usercheck.rows.length > 0) {
-            res.status(400).json({ message: 'User already exists' })
+            res.status(302).json({ message: 'User already exists' })
             return;
         }
         const userid = v4();
         const hashPass = await bcrypt.hash(password, 10);
-        const token = jwt.sign({ userId: userid }, process.env.JWT_SECRET);
+        const token = create_token({userId:userId})
         const newuser = await pool.query(
             'INSERT INTO users (userid,name,email,passwords,dob,phonenumber,access_token) VALUES ($1,$2,$3,$4,$5,$6,$7)', 
             [userid, name, email, hashPass, dob, phonenumber,token]);
@@ -44,18 +40,19 @@ async function register(req, res, next) {
 async function login(req, res) {
     const { email, password } = req.body;
     try {
-        const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = await pool.query('SELECT userId FROM users WHERE email = $1', [email]);
         if (user.rows.length == 0) {
-            res.status(400).json({ message: 'User does not exist' });
+            res.status(401).json({ message: 'Invalid credentials' });
             return;
         }
         const validPass = await bcrypt.compare(password, user.rows[0].passwords);
         if (!validPass) {
-            res.status(400).json({ message: 'Invalid password' });
+            res.status(401).json({ message: 'Invalid credentials' });
             return;
         }
-        const token = jwt.sign({ userId: user.rows[0].userid }, JWT_SECRET, { expiresIn: '2h' });
-        res.status(200).json({ token });
+        const token = create_token({userId:user.rows[0].userId});
+        // const token = jwt.sign({ userId: user.rows[0].userid }, JWT_SECRET, { expiresIn: '2h' });
+        res.status(200).json({message: token });
     }
     catch (err) {
         res.status(500).json({ message: err.message });
@@ -66,7 +63,7 @@ async function forgot_password(req, res) {
     const { email } = req.body;
     const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
     if (user.rows.length == 0) {
-        res.status(400).json({ message: 'User does not exist' });
+        res.status(404).json({ message: 'User does not exist' });
         return;
     }
     else {
@@ -89,10 +86,10 @@ async function forgot_password(req, res) {
             },
         });
         const options = {
-            from: 'nandhithasakthivel7@gmail.com',
+            from: process.env.MAIL_ID,
             to: email,
             subject: 'Password Reset',
-            text: `Use this token to reset your password and link http://localhost:8000/reset-password/${token}`,
+            text: `Use this token to reset your password and link http://localhost:3000/reset-password/${token}`,
         };
         transporter.sendMail(options, (err, info) => {
             if (err) {
