@@ -1,54 +1,62 @@
 drop table if EXISTS users;
-drop table if EXISTS Admin;
-drop table if EXISTS Batch;
-drop table if EXISTS Food;
-drop table if EXISTS Cart;
+drop table if EXISTS admin;
+drop table if EXISTS batch;
+drop table if EXISTS food;
+drop table if EXISTS employees;
+drop table if EXISTS cart;
 
-CREATE TABLE users (
-    userid VARCHAR(36) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS users (
+    userId VARCHAR(36) PRIMARY KEY,
     name VARCHAR(50),
     email VARCHAR(100) UNIQUE NOT NULL,
-    passwords VARCHAR(60) NOT NULL,
+    password VARCHAR(60) NOT NULL,
     dob DATE,
-    phonenumber VARCHAR(15)
+    phonenumber VARCHAR(15),
+    access_token VARCHAR(255),
+    refresh_token VARCHAR(255)
 );
 
-CREATE TABLE Admin (
-    Role VARCHAR(10),
-    ID INT PRIMARY KEY,
-    Name VARCHAR(20),
-    Email VARCHAR(20),
-    Passwords VARCHAR(20)
+CREATE TABLE IF NOT EXISTS employees (
+    role VARCHAR(10),
+    employeeId INT PRIMARY KEY,
+    name VARCHAR(20),
+    email VARCHAR(20),
+    password VARCHAR(20),
+    access_token VARCHAR(255),
+    refresh_token VARCHAR(255)
 );
 
-CREATE TABLE Batch (
-    BatchId INT PRIMARY KEY,
-    ManufacturingDate DATE,
-    ExpiryDate DATE,
-    Manufacture INT
+CREATE TABLE IF NOT EXISTS batch (
+    batchId INT PRIMARY KEY,
+    manufacturingDate DATE,
+    expiryDate DATE,
+    manufacture INT
 );
 
-CREATE TABLE Food (
-    ID INT PRIMARY KEY,
-    Name VARCHAR(20),
-    BatchID INT,
+CREATE TABLE IF NOT EXISTS food (
+    id INT PRIMARY KEY,
+    name VARCHAR(20),
+    batchId INT,
     cost INT,
     stock INT,
-    Description VARCHAR(255),
-    FOREIGN KEY (BatchID) REFERENCES Batch(BatchID)
+    description VARCHAR(255),
+    FOREIGN KEY (batchId) REFERENCES batch(batchId)
 );
 
-CREATE TABLE Cart (
+CREATE TABLE IF NOT EXISTS cart(
     count INT,
-    Userid VARCHAR(36),
-    FoodID INT,
-    FOREIGN KEY (Userid) REFERENCES Users(Userid),
-    FOREIGN KEY (FoodID) REFERENCES Food(ID)
+    userId VARCHAR(36),
+    foodId INT,
+    FOREIGN KEY (userId) REFERENCES users(userId),
+    FOREIGN KEY (foodId) REFERENCES food(id)
 );
 
-CREATE TABLE WishList (
-    FoodID INT,
-    Userid VARCHAR(36),
-    FOREIGN KEY (FoodID) REFERENCES food(ID),
-    FOREIGN KEY (Userid) REFERENCES users(Userid)
+CREATE TABLE IF NOT EXISTS wishList (
+    foodId INT,
+    userId VARCHAR(36),
+    FOREIGN KEY (foodId) REFERENCES food(id),
+    FOREIGN KEY (userId) REFERENCES users(userId)
 );
+
+
+\dt
