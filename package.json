@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "source load.sh;nodemon index.js"
+    "build":"start load.bat",
+    "dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",

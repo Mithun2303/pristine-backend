@@ -45,10 +45,10 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(bodyParser.json());
 app.use('/api/auth',middleware, authentication);
 // app.use('/api/food', foodRoutes);
 // app.use('/api/password', passRoutes);
-app.use(bodyParser.json());
 
 // app.use(
 //     "/api/docs",

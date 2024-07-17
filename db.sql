@@ -1,9 +1,8 @@
-drop table if EXISTS users;
-drop table if EXISTS admin;
+drop table if EXISTS cart;
 drop table if EXISTS batch;
 drop table if EXISTS food;
 drop table if EXISTS employees;
-drop table if EXISTS cart;
+drop table if EXISTS users;
 
 CREATE TABLE IF NOT EXISTS users (
     userId VARCHAR(36) PRIMARY KEY,
@@ -60,3 +59,6 @@ CREATE TABLE IF NOT EXISTS wishList (
 
 
 \dt
+INSERT INTO users(name, email, password, dob, phonenumber) VALUES ('mithun','mithunkarthick1610@gmail.com','Password@123','2005-03-23','8124473187');
+INSERT INTO batch(manufacturingDate, expiryDate, manufacture) VALUES ('2020-01-01','2020-01-01',1);
+INSERT INTO FOOD()

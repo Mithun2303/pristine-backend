@@ -22,12 +22,13 @@ async function register(req, res, next) {
             res.status(302).json({ message: 'User already exists' })
             return;
         }
-        const userid = v4();
+        const userId = v4();
         const hashPass = await bcrypt.hash(password, 10);
         const token = create_token({userId:userId})
+        //console.log("newuser");
         const newuser = await pool.query(
-            'INSERT INTO users (userid,name,email,passwords,dob,phonenumber,access_token) VALUES ($1,$2,$3,$4,$5,$6,$7)', 
-            [userid, name, email, hashPass, dob, phonenumber,token]);
+            'INSERT INTO users (userId,name,email,password,dob,phonenumber,access_token) VALUES ($1,$2,$3,$4,$5,$6,$7)', 
+            [userId, name, email, hashPass, dob, phonenumber,token]);
         res.status(201).json({ token })
         return;
     }
@@ -40,12 +41,14 @@ async function register(req, res, next) {
 async function login(req, res) {
     const { email, password } = req.body;
     try {
-        const user = await pool.query('SELECT userId FROM users WHERE email = $1', [email]);
+        const user = await pool.query('SELECT userId,password FROM users WHERE email = $1', [email]);
+        console.log(user.rows);
         if (user.rows.length == 0) {
             res.status(401).json({ message: 'Invalid credentials' });
             return;
         }
-        const validPass = await bcrypt.compare(password, user.rows[0].passwords);
+        console.log("token");
+        const validPass = await bcrypt.compare(password, user.rows[0].password);
         if (!validPass) {
             res.status(401).json({ message: 'Invalid credentials' });
             return;
