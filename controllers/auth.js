@@ -64,14 +64,15 @@ async function login(req, res) {
 }
 async function forgot_password(req, res) {
     const { email } = req.body;
-    const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    const token = await pool.query('SELECT access_token FROM users WHERE email = $1', [email]);
     if (user.rows.length == 0) {
         res.status(404).json({ message: 'User does not exist' });
         return;
     }
     else {
-        const token = crypto.randomBytes(20).toString('hex');
-        await db.query('UPDATE users SET resettoken = $1 WHERE email = $2', [token, email]);
+        //const token = crypto.randomBytes(20).toString('hex');
+        //await pool.query('UPDATE users SET resettoken = $1 WHERE email = $2', [token, email]);
         const transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             service: 'gmail',
@@ -106,5 +107,19 @@ async function forgot_password(req, res) {
         })
     }
 }
+async function reset_password(req,res){
+    const { email, password } = req.body;
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user.rows.length == 0) {
+        res.status(404).json({ message: 'User does not exist' });
+        return;
+    }
+    else {
+        const hashPass = await bcrypt.hash(password, 10);
+        await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashPass, email]);
+        res.status(200).json({ message: 'Password reset successfully' });
+        return;
+    }
+}
 
-module.exports = { login, forgot_password, register };
+module.exports = { login, forgot_password, register,reset_password };

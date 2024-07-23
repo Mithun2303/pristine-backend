@@ -6,6 +6,7 @@ const { middleware } = require("./middleware/middleware");
 const authorization = require("./middleware/authorization");
 
 const authentication = require("./routes/auth");
+const foodRoutes = require("./routes/food");
 // const foodRoutes = require("./controllers/food");
 
 // const swaggerJsdoc = require("swagger-jsdoc");
@@ -47,6 +48,7 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use('/api/auth',middleware, authentication);
+app.use('/api/food',middleware, foodRoutes);
 // app.use('/api/food', foodRoutes);
 // app.use('/api/password', passRoutes);
 
